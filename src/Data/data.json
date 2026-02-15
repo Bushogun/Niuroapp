@@ -1,0 +1,46 @@
+{ 
+  "machines": [       
+    {         
+      "id": 28475,      
+      "name": "COMPRESOR 1",     
+      "events": [     
+        {       
+          "type": "health_change",   
+          "date": "2023-01-28 18:25:43+00:00",   
+          "data": {       
+            "previous_health": 1,    
+            "current_health": 3   
+          } 
+        }, 
+        {       
+          "type": "intervention",     
+          "date": "2023-01-29 15:10:11+00:00", 
+          "data": {      
+            "details": "Se realizó una lubricación de la caja reductora" 
+          } 
+        } 
+      ] 
+    }, 
+    {       
+      "id": 24571,     
+      "name": "BOMBA 2",   
+      "events": [    
+        {     
+          "type": "health_change", 
+          "date": "2023-01-28 15:10:17+00:00",
+          "data": {     
+            "previous_health": 3,   
+            "current_health": 2    
+          } 
+        }, 
+        {      
+          "type": "intervention",  
+          "date": "2023-01-31 12:22:47+00:00", 
+          "data": {     
+            "details": "Se realizó un cambio del rodamiento delantero" 
+          } 
+        } 
+      ] 
+    } 
+  ] 
+}
