@@ -29,7 +29,12 @@ const machineSlice = createSlice({
       })
       .addCase(fetchMachines.fulfilled, (state, action) => {
         state.loading = false;
-        state.machines = action.payload;
+        state.machines = action.payload.map((m) => ({
+          ...m,
+          events: [...m.events].sort(
+            (a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+          )
+        }));
       })
       .addCase(fetchMachines.rejected, (state, action) => {
         state.loading = false;

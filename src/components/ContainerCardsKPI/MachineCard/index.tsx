@@ -25,8 +25,8 @@ export default function MachineCard({ machine }: Props) {
       ? healthChanges[0].data.current_health
       : 1;
 
-  const healthConfig = healthStyles[currentHealth];
-  const healthLabel = healthStatus[currentHealth];
+  const healthConfig = healthStyles[currentHealth as 0 | 1 | 2 | 3];
+  const healthLabel = healthStatus[currentHealth as 0 | 1 | 2 | 3];
 
   const lastIntervention =
     interventions.length > 0
@@ -40,6 +40,7 @@ export default function MachineCard({ machine }: Props) {
         cursor-pointer
         flex flex-col justify-between
         min-h-[170px]
+        min-w-[300px]
         rounded-2xl p-5 border-2
         transition-all duration-200 ease-in-out
         shadow-sm
