@@ -8,26 +8,55 @@ import { healthStyles } from "../../constants/healthStyles";
 import { formatDate } from "../../utils/formatDate";
 import { FaTools } from "react-icons/fa";
 import { MdMonitorHeart } from "react-icons/md";
+import { useMemo } from "react";
 
 export default function MachineDetail() {
   const { id } = useParams();
   const machines = useSelector((state: RootState) => state.machines.machines);
+  const { fromDate, toDate } = useSelector((state: RootState) => state.ui);
+
+  const filteredMachines = useMemo(() => {
+    if (!fromDate || !toDate) return machines;
+
+    const start = new Date(fromDate);
+    const end = new Date(toDate);
+
+    return machines.filter((machine) =>
+      machine.events.some((event) => {
+        const eventDate = new Date(event.date);
+        return eventDate >= start && eventDate <= end;
+      })
+    );
+  }, [machines, fromDate, toDate]);
+
+  const machine = machines.find((m) => m.id === Number(id));
+
+  const filteredEvents = useMemo(() => {
+    if (!machine) return [];
+    if (!fromDate || !toDate) return machine.events;
+
+    const start = new Date(fromDate);
+    const end = new Date(toDate);
+
+    return machine.events.filter((event) => {
+      const eventDate = new Date(event.date);
+      return eventDate >= start && eventDate <= end;
+    });
+  }, [machine, fromDate, toDate]);
 
   if (!id) {
     return (
       <div className="p-6">
-        <MachineGrid machines={machines} />
+        <MachineGrid machines={filteredMachines} />
       </div>
     );
   }
-
-  const machine = machines.find((m) => m.id === Number(id));
 
   if (!machine) {
     return <div className="p-6">Máquina no encontrada</div>;
   }
 
-  const healthEvents = machine.events.filter(
+  const healthEvents = filteredEvents.filter(
     (e): e is Extract<MachineEvent, { type: "health_change" }> =>
       e.type === "health_change"
   );
@@ -41,8 +70,6 @@ export default function MachineDetail() {
 
   return (
     <div className="p-4 md:p-6 max-w-5xl mx-auto">
-      
-      {/* Header */}
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3 mb-6">
         <h2 className="text-xl md:text-2xl font-bold">{machine.name}</h2>
 
@@ -53,30 +80,24 @@ export default function MachineDetail() {
         </span>
       </div>
 
-      {/* Info card */}
-      <div
-        className={`rounded-2xl shadow-sm p-6 border-2 ${style.card}`}
-      >
+      <div className={`rounded-2xl shadow-sm p-6 border-2 ${style.card}`}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
           <p>
             <strong>ID:</strong> {machine.id}
           </p>
           <p>
-            <strong>Total eventos:</strong> {machine.events.length}
+            <strong>Total eventos:</strong> {filteredEvents.length}
           </p>
         </div>
       </div>
 
-      {/* Historial */}
       <h3 className="text-lg md:text-xl font-semibold mt-8 mb-4">
         Historial de eventos
       </h3>
 
       <div className="space-y-4">
-        {machine.events.map((event: MachineEvent, index: number) => {
-          
+        {filteredEvents.map((event: MachineEvent, index: number) => {
           if (event.type === "health_change") {
-
             const currentLevel = event.data.current_health as HealthLevel;
             const previousLevel = event.data.previous_health as HealthLevel;
 
@@ -98,17 +119,12 @@ export default function MachineDetail() {
                 </p>
 
                 <div className="flex flex-wrap items-center gap-2 text-sm">
-                  
-                  {/* Estado anterior con color */}
                   <span
                     className={`text-white text-xs px-2 py-1 rounded ${previousStyle.badge}`}
                   >
                     {healthStatus[previousLevel]}
                   </span>
-
                   <span>→</span>
-
-                  {/* Estado nuevo */}
                   <span
                     className={`text-white text-xs px-2 py-1 rounded ${currentStyle.badge}`}
                   >
@@ -119,7 +135,6 @@ export default function MachineDetail() {
             );
           }
 
-          // 🔧 Intervención
           return (
             <div
               key={index}
