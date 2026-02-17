@@ -1,115 +1,120 @@
 import React from 'react';
 import Chart from 'react-apexcharts';
+import { useSelector } from 'react-redux';
 
-const HEALTH_CONFIG = {
-    0: { label: "Óptimo", color: "#15803d" },
-    1: { label: "Aceptable", color: "#84cc16" },
-    2: { label: "Atención", color: "#f97316" },
-    3: { label: "Peligro", color: "#ef4444" },
+const HEALTH_CONFIG: any = {
+  0: { label: "Óptimo", color: "#15803d" },
+  1: { label: "Aceptable", color: "#84cc16" },
+  2: { label: "Atención", color: "#f97316" },
+  3: { label: "Peligro", color: "#ef4444" },
 };
 
 export default function HealthTimeline({ events }: { events: any[] }) {
+  // Obtenemos N del estado global (ajusta la ruta según tu Redux)
+  const nDaysFilter = useSelector((state: any) => state.filters?.nDays) || 1;
+
   const series = React.useMemo(() => {
-    const healthEvents = events
-      .filter((e:any) => e.type === "health_change")
-      .sort((a:any, b:any) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    if (!events || events.length === 0) return [];
+
+    // --- 1. Filtrar y ordenar correctamente (Corrección del error 'b') ---
+    const healthEvents = [...events]
+      .filter((e: any) => e.type === "health_change")
+      .sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
     if (healthEvents.length === 0) return [];
 
-    const lastEventDate = new Date(healthEvents[healthEvents.length - 1].date).getTime();
-    
-    const dataByLevel = { 0: [], 1: [], 2: [], 3: [] };
+    // --- 2. Colapsar eventos con el mismo timestamp exacto ---
+    const uniqueTimeEvents: any[] = [];
+    healthEvents.forEach((event) => {
+      const last = uniqueTimeEvents[uniqueTimeEvents.length - 1];
+      if (last && last.date === event.date) {
+        // Mismo tiempo: actualizamos el estado actual al último reportado
+        last.data.current_health = event.data.current_health;
+      } else {
+        // Nuevo timestamp: clonamos el evento
+        uniqueTimeEvents.push({ ...event, data: { ...event.data } });
+      }
+    });
 
-    for (let i = 0; i < healthEvents.length; i++) {
-      const start = new Date(healthEvents[i].date).getTime();
-      
-      // Si no hay siguiente evento, el "fin" de este bloque es el mismo que su "inicio"
-      // (o una duración mínima para que sea visible, ej. + 1 hora)
-      // Pero para seguir la lógica de línea de tiempo, el penúltimo termina donde empieza el último.
-      const nextEvent = healthEvents[i + 1];
-      const end = nextEvent 
-        ? new Date(nextEvent.date).getTime() 
-        : start + (1000 * 60 * 60 * 2); // Si es el último, le damos 2 horas de ancho visual
+    // --- 3. Filtrar transitorios < N días ---
+    const nMs = nDaysFilter * 24 * 60 * 60 * 1000;
+    const dataByLevel: any = { 0: [], 1: [], 2: [], 3: [] };
 
-      const level = healthEvents[i].data.current_health;
-      
-      if (dataByLevel[level] !== undefined) {
+    for (let i = 0; i < uniqueTimeEvents.length; i++) {
+      const current = uniqueTimeEvents[i];
+      const start = new Date(current.date).getTime();
+      let end: number;
+
+      // Buscamos el siguiente evento que sea estable (dure >= N días)
+      let nextStableIndex = i + 1;
+      while (nextStableIndex < uniqueTimeEvents.length) {
+        const nextDate = new Date(uniqueTimeEvents[nextStableIndex].date).getTime();
+        if ((nextDate - start) >= nMs) {
+          break;
+        }
+        nextStableIndex++;
+      }
+
+      // Si encontramos un evento estable, el actual termina ahí. 
+      // Si no, termina en el final de la serie o un margen default.
+      if (nextStableIndex < uniqueTimeEvents.length) {
+        end = new Date(uniqueTimeEvents[nextStableIndex].date).getTime();
+      } else {
+        const lastDate = new Date(uniqueTimeEvents[uniqueTimeEvents.length - 1].date).getTime();
+        end = lastDate === start ? start + (1000 * 60 * 60 * 2) : lastDate;
+      }
+
+      const level = current.data.current_health;
+      if (HEALTH_CONFIG[level]) {
         dataByLevel[level].push({
           x: HEALTH_CONFIG[level].label,
           y: [start, end]
         });
       }
+
+      // Saltamos los eventos transitorios que ya "absorbimos"
+      i = nextStableIndex - 1;
     }
 
-    return Object.keys(dataByLevel).reverse().map(level => ({
-      name: HEALTH_CONFIG[level].label,
-      data: dataByLevel[level],
-      color: HEALTH_CONFIG[level].color
-    }));
-  }, [events]);
+    return Object.keys(dataByLevel)
+      .reverse()
+      .map((level) => ({
+        name: HEALTH_CONFIG[level].label,
+        data: dataByLevel[level],
+        color: HEALTH_CONFIG[level].color,
+      }));
+  }, [events, nDaysFilter]);
 
-  const options = {
-  chart: {
-    type: 'rangeBar',
-    toolbar: { show: false },
-  },
-  plotOptions: {
-    bar: {
-      horizontal: true,
-      barHeight: '60%',
-      rangeBarGroupRows: true,
-      borderRadius: 4
-    }
-  },
-  xaxis: {
-    type: 'datetime',
-    tickAmount: 8, 
-    labels: {
-      rotate: 0, 
-      hideOverlappingLabels: true,
-      style: {
-        fontSize: '11px',
-        colors: '#64748b'
-      },
-      datetimeUTC: false, 
-      format: 'd MMM', 
+  const options: any = {
+    chart: { 
+        type: 'rangeBar', 
+        toolbar: { show: false },
+        animations: { enabled: false } // Desactivar para mejor performance con muchos datos
     },
-    axisBorder: { show: false },
-    axisTicks: { show: false }
-  },
-  yaxis: {
-    labels: {
-      style: {
-        fontWeight: 600,
-        fontSize: '12px',
-        colors: '#334155'
+    plotOptions: {
+      bar: {
+        horizontal: true,
+        barHeight: '70%',
+        rangeBarGroupRows: true,
+        borderRadius: 4
       }
-    }
-  },
-  grid: {
-    borderColor: '#f1f5f9',
-    xaxis: {
-      lines: { show: true } 
     },
-    row: {
-      colors: ['#f8fafc', 'transparent'],
-      opacity: 0.8
-    }
-  },
-    tooltip: {
-      x: { format: 'dd MMM HH:mm' }
-    }
+    xaxis: {
+      type: 'datetime',
+      labels: {
+        datetimeUTC: false,
+        format: 'dd MMM',
+      },
+    },
+    tooltip: { x: { format: 'dd MMM HH:mm' } }
   };
 
   return (
     <div className="w-full bg-white p-4 rounded border border-gray-200">
-
-      <Chart
-        options={options}
-        series={series}
-        type="rangeBar"
-        height={280}
-      />
+      <div className="text-xs text-gray-400 mb-2">
+        Mostrando estados con duración ≥ {nDaysFilter} {nDaysFilter === 1 ? 'día' : 'días'}
+      </div>
+      <Chart options={options} series={series} type="rangeBar" height={280} />
     </div>
   );
 }
