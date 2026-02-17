@@ -10,33 +10,27 @@ const HEALTH_CONFIG: any = {
 };
 
 export default function HealthTimeline({ events }: { events: any[] }) {
-  // Obtenemos N del estado global (ajusta la ruta según tu Redux)
   const nDaysFilter = useSelector((state: any) => state.filters?.nDays) || 1;
 
   const series = React.useMemo(() => {
     if (!events || events.length === 0) return [];
 
-    // --- 1. Filtrar y ordenar correctamente (Corrección del error 'b') ---
     const healthEvents = [...events]
       .filter((e: any) => e.type === "health_change")
       .sort((a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
     if (healthEvents.length === 0) return [];
 
-    // --- 2. Colapsar eventos con el mismo timestamp exacto ---
     const uniqueTimeEvents: any[] = [];
     healthEvents.forEach((event) => {
       const last = uniqueTimeEvents[uniqueTimeEvents.length - 1];
       if (last && last.date === event.date) {
-        // Mismo tiempo: actualizamos el estado actual al último reportado
         last.data.current_health = event.data.current_health;
       } else {
-        // Nuevo timestamp: clonamos el evento
         uniqueTimeEvents.push({ ...event, data: { ...event.data } });
       }
     });
 
-    // --- 3. Filtrar transitorios < N días ---
     const nMs = nDaysFilter * 24 * 60 * 60 * 1000;
     const dataByLevel: any = { 0: [], 1: [], 2: [], 3: [] };
 
@@ -45,7 +39,6 @@ export default function HealthTimeline({ events }: { events: any[] }) {
       const start = new Date(current.date).getTime();
       let end: number;
 
-      // Buscamos el siguiente evento que sea estable (dure >= N días)
       let nextStableIndex = i + 1;
       while (nextStableIndex < uniqueTimeEvents.length) {
         const nextDate = new Date(uniqueTimeEvents[nextStableIndex].date).getTime();
@@ -55,8 +48,6 @@ export default function HealthTimeline({ events }: { events: any[] }) {
         nextStableIndex++;
       }
 
-      // Si encontramos un evento estable, el actual termina ahí. 
-      // Si no, termina en el final de la serie o un margen default.
       if (nextStableIndex < uniqueTimeEvents.length) {
         end = new Date(uniqueTimeEvents[nextStableIndex].date).getTime();
       } else {
@@ -71,8 +62,6 @@ export default function HealthTimeline({ events }: { events: any[] }) {
           y: [start, end]
         });
       }
-
-      // Saltamos los eventos transitorios que ya "absorbimos"
       i = nextStableIndex - 1;
     }
 
@@ -89,7 +78,7 @@ export default function HealthTimeline({ events }: { events: any[] }) {
     chart: { 
         type: 'rangeBar', 
         toolbar: { show: false },
-        animations: { enabled: false } // Desactivar para mejor performance con muchos datos
+        animations: { enabled: false } 
     },
     plotOptions: {
       bar: {
