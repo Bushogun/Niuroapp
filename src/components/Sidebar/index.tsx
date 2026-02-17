@@ -11,7 +11,6 @@ interface SidebarProps {
 const menuItems = [
   { label: "Dashboard", path: "/", icon: MdDashboard },
   { label: "Machine Detail", path: "/machine-detail", icon: FaMicrochip },
-  { label: "Analytics", path: "/analytics", icon: MdAnalytics },
 ];
 
 const Sidebar: FC<SidebarProps> = ({ open, setOpen }) => {
