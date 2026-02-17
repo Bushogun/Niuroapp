@@ -1,46 +1,91 @@
-{ 
-  "machines": [       
-    {         
-      "id": 28475,      
-      "name": "COMPRESOR 1",     
-      "events": [     
-        {       
-          "type": "health_change",   
-          "date": "2023-01-28 18:25:43+00:00",   
-          "data": {       
-            "previous_health": 1,    
-            "current_health": 3   
-          } 
-        }, 
-        {       
-          "type": "intervention",     
-          "date": "2023-01-29 15:10:11+00:00", 
-          "data": {      
-            "details": "Se realizó una lubricación de la caja reductora" 
-          } 
-        } 
-      ] 
-    }, 
-    {       
-      "id": 24571,     
-      "name": "BOMBA 2",   
-      "events": [    
-        {     
-          "type": "health_change", 
-          "date": "2023-01-28 15:10:17+00:00",
-          "data": {     
-            "previous_health": 3,   
-            "current_health": 2    
-          } 
-        }, 
-        {      
-          "type": "intervention",  
-          "date": "2023-01-31 12:22:47+00:00", 
-          "data": {     
-            "details": "Se realizó un cambio del rodamiento delantero" 
-          } 
-        } 
-      ] 
-    } 
-  ] 
+{
+  "machines": [
+    {
+      "id": 28475,
+      "name": "COMPRESOR 1 (TEST DE RÁFAGAS)",
+      "events": [
+        {
+          "type": "health_change",
+          "date": "2023-01-01 08:00:00+00:00",
+          "data": { "previous_health": 0, "current_health": 1 }
+        },
+        {
+          "type": "health_change",
+          "date": "2023-01-03 10:00:00+00:00",
+          "data": { "previous_health": 1, "current_health": 2 }
+        },
+        {
+          "type": "health_change",
+          "date": "2023-01-03 10:00:00+00:00",
+          "data": { "previous_health": 2, "current_health": 3 }
+        },
+        {
+          "type": "intervention",
+          "date": "2023-01-04 09:30:00+00:00",
+          "data": { "details": "Ajuste menor de válvula" }
+        },
+        {
+          "type": "health_change",
+          "date": "2023-01-05 14:00:00+00:00",
+          "data": { "previous_health": 3, "current_health": 1 }
+        },
+        {
+          "type": "health_change",
+          "date": "2023-01-05 18:00:00+00:00",
+          "data": { "previous_health": 1, "current_health": 2 }
+        },
+        {
+          "type": "health_change",
+          "date": "2023-01-06 08:00:00+00:00",
+          "data": { "previous_health": 2, "current_health": 2 }
+        },
+        {
+          "type": "health_change",
+          "date": "2023-01-10 07:00:00+00:00",
+          "data": { "previous_health": 2, "current_health": 0 }
+        }
+      ]
+    },
+    {
+      "id": 24571,
+      "name": "BOMBA 2 (OSCILACIÓN CRÍTICA)",
+      "events": [
+        {
+          "type": "health_change",
+          "date": "2023-02-01 07:00:00+00:00",
+          "data": { "previous_health": 0, "current_health": 3 }
+        },
+        {
+          "type": "health_change",
+          "date": "2023-02-02 08:00:00+00:00",
+          "data": { "previous_health": 3, "current_health": 2 }
+        },
+        {
+          "type": "health_change",
+          "date": "2023-02-02 14:00:00+00:00",
+          "data": { "previous_health": 2, "current_health": 3 }
+        },
+        {
+          "type": "health_change",
+          "date": "2023-02-02 20:00:00+00:00",
+          "data": { "previous_health": 3, "current_health": 2 }
+        },
+        {
+          "type": "intervention",
+          "date": "2023-02-03 09:00:00+00:00",
+          "data": { "details": "Lubricación completa" }
+        },
+        {
+          "type": "health_change",
+          "date": "2023-02-05 10:00:00+00:00",
+          "data": { "previous_health": 2, "current_health": 1 }
+        },
+        {
+          "type": "health_change",
+          "date": "2023-02-14 14:00:00+00:00",
+          "data": { "previous_health": 1, "current_health": 0 }
+        }
+      ]
+    }
+  ]
 }

@@ -12,7 +12,6 @@ const menuItems = [
   { label: "Dashboard", path: "/", icon: MdDashboard },
   { label: "Machine Detail", path: "/machine-detail", icon: FaMicrochip },
   { label: "Analytics", path: "/analytics", icon: MdAnalytics },
-  { label: "Plant", path: "/plant", icon: MdFactory },
 ];
 
 const Sidebar: FC<SidebarProps> = ({ open, setOpen }) => {

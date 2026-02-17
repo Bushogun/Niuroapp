@@ -9,6 +9,7 @@ import { formatDate } from "../../utils/formatDate";
 import { FaTools } from "react-icons/fa";
 import { MdMonitorHeart } from "react-icons/md";
 import { useMemo } from "react";
+import HealthTimeline from "../../components/HealthTimeline/HealthTimeline";
 
 export default function MachineDetail() {
   const { id } = useParams();
@@ -25,7 +26,7 @@ export default function MachineDetail() {
       machine.events.some((event) => {
         const eventDate = new Date(event.date);
         return eventDate >= start && eventDate <= end;
-      })
+      }),
     );
   }, [machines, fromDate, toDate]);
 
@@ -58,28 +59,26 @@ export default function MachineDetail() {
 
   const healthEvents = filteredEvents.filter(
     (e): e is Extract<MachineEvent, { type: "health_change" }> =>
-      e.type === "health_change"
+      e.type === "health_change",
   );
 
   const currentHealth: HealthLevel =
     healthEvents.length > 0
-      ? (healthEvents[0].data.current_health as HealthLevel)
+      ? (healthEvents[healthEvents.length - 1].data
+          .current_health as HealthLevel)
       : 1;
-
   const style = healthStyles[currentHealth];
 
   return (
     <div className="p-4 md:p-6 max-w-5xl mx-auto">
       <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3 mb-6">
         <h2 className="text-xl md:text-2xl font-bold">{machine.name}</h2>
-
         <span
           className={`text-white text-sm px-3 py-1 rounded-full w-fit ${style.badge}`}
         >
           {healthStatus[currentHealth]}
         </span>
       </div>
-
       <div className={`rounded-2xl shadow-sm p-6 border-2 ${style.card}`}>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
           <p>
@@ -90,11 +89,9 @@ export default function MachineDetail() {
           </p>
         </div>
       </div>
-
       <h3 className="text-lg md:text-xl font-semibold mt-8 mb-4">
         Historial de eventos
       </h3>
-
       <div className="space-y-4">
         {filteredEvents.map((event: MachineEvent, index: number) => {
           if (event.type === "health_change") {
@@ -149,12 +146,13 @@ export default function MachineDetail() {
                 {formatDate(event.date)}
               </p>
 
-              <p className="text-sm text-gray-700">
-                {event.data.details}
-              </p>
+              <p className="text-sm text-gray-700">{event.data.details}</p>
             </div>
           );
         })}
+      </div>
+      <div className="my-8 border-t pt-6">
+        <HealthTimeline events={filteredEvents} />
       </div>
     </div>
   );
