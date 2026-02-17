@@ -38,6 +38,7 @@ npm install
 # Iniciar el servidor de desarrollo
 npm run dev
 
+```
 
 ### 1. Email HTML (Diseño de Alerta)
 El diseño del correo electrónico prioriza la legibilidad inmediata y la acción rápida del operador.
